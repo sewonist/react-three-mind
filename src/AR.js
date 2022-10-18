@@ -49,6 +49,7 @@ const ARProvider = forwardRef(
     const [faceMeshes] = useAtom(faceMeshesAtom);
 
     const { width, height } = useWindowSize();
+
     const isLandscape = useMemo(() => height <= width, [height, width]);
     const ratio = useMemo(
       () => (isLandscape ? width / height : height / width),
@@ -252,6 +253,32 @@ const ARProvider = forwardRef(
       }
     }, [autoplay, ready, startTracking]);
 
+    const deviceModel = ()=>{
+      let currentOS;
+      const mobile = (/iphone|ipad|ipod|android/i.test( navigator.userAgent.toLowerCase() ));
+
+      if (mobile)
+      {
+        const userAgent = navigator.userAgent.toLowerCase();
+        if (userAgent.search("android") > -1) {
+          currentOS = "android";
+        } else if ((userAgent.search("iphone") > -1) || (userAgent.search("ipod") > -1) || (userAgent.search("ipad") > -1)) {
+          currentOS = "ios";
+        } else { currentOS = "else"; }
+      }
+      else  {  currentOS = "nomobile"; }
+
+      if (currentOS === 'android') {
+        return {
+          width: "auto",
+          marginLeft: "-100%"
+        }
+      } else {
+        return {}
+      }
+    }
+
+
     return (
       <>
         <Html
@@ -268,7 +295,10 @@ const ARProvider = forwardRef(
             videoConstraints={{
               facingMode: isWebcamFacingUser ? "user" : "environment",
               aspectRatio: ratio,
+              height: height,
+              width: width
             }}
+            style={deviceModel()}
           />
         </Html>
         {children}
