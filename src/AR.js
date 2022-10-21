@@ -17,7 +17,7 @@ import React, {
 import {atom, useAtom} from "jotai";
 
 import {Controller as FaceTargetController} from "mind-ar/src/face-target/controller";
-import {Center, Html} from "@react-three/drei";
+import {Html} from "@react-three/drei";
 import {Controller as ImageTargetController} from "mind-ar/src/image-target/controller";
 import Webcam from "react-webcam";
 import {useUpdateAtom} from "jotai/utils";
@@ -49,38 +49,7 @@ const ARProvider = forwardRef(
     const {camera} = useThree();
     const [anchors] = useAtom(anchorsAtom);
     const [faceMeshes] = useAtom(faceMeshesAtom);
-
     const {width, height} = useWindowSize();
-
-    const isAndroid = () => {
-      let currentOS;
-      const mobile = (/iphone|ipad|ipod|android/i.test(navigator.userAgent.toLowerCase()));
-
-      if (mobile) {
-        const userAgent = navigator.userAgent.toLowerCase();
-        if (userAgent.search("android") > -1) {
-          currentOS = "android";
-        } else if ((userAgent.search("iphone") > -1) || (userAgent.search("ipod") > -1) || (userAgent.search("ipad") > -1)) {
-          currentOS = "ios";
-        } else {
-          currentOS = "else";
-        }
-      } else {
-        currentOS = "nomobile";
-      }
-
-      if (currentOS === 'android') {
-        return true
-      } else {
-        return false
-      }
-    }
-
-    const isLandscape = useMemo(() => height <= width, [height, width]);
-    const ratio = useMemo(
-      () => (isLandscape ? width / height : height / width),
-      [isLandscape, width, height]
-    );
 
     useEffect(() => {
       if (controllerRef.current) {
@@ -99,7 +68,6 @@ const ARProvider = forwardRef(
     const handleStream = useCallback(() => {
       if (webcamRef.current) {
         webcamRef.current.video.addEventListener("loadedmetadata", () => {
-            console.log(' --- loadedmetadata:')
             setReady(true)
           }
         );
@@ -108,15 +76,8 @@ const ARProvider = forwardRef(
 
     const startTracking = useCallback(async () => {
       if (ready) {
-        onReady && onReady()
         let controller;
         if (imageTargets) {
-
-          console.log(' --- webcamRef.current.video.videoWidth')
-          console.log(webcamRef.current.video.videoWidth)
-          console.log(' --- webcamRef.current.video.videoHeight')
-          console.log(webcamRef.current.video.videoHeight)
-
           controller = new ImageTargetController({
             inputWidth: webcamRef.current.video.videoWidth,
             inputHeight: webcamRef.current.video.videoHeight,
@@ -181,6 +142,8 @@ const ARProvider = forwardRef(
               );
             }
           };
+
+
         } else {
           controller = new FaceTargetController({
             filterMinCF,
@@ -238,6 +201,8 @@ const ARProvider = forwardRef(
         controller.processVideo(webcamRef.current.video);
 
         controllerRef.current = controller;
+
+        onReady && onReady()
       }
     }, [
       ready,
@@ -288,22 +253,12 @@ const ARProvider = forwardRef(
       }
     }, [autoplay, ready, startTracking]);
 
-
-
     const fixStyle = () => {
-      const android = isAndroid()
-
-      console.log(webcamRef.current)
-      // console.log(webcamRef.current.style)
-
       let offset = 0
-
       if(webcamRef.current?.video?.clientWidth>0){
         offset = (width - webcamRef.current.video.clientWidth) / 2;
       }
-
       offset = parseInt(offset+'')
-
       // const styles = getComputedStyle(webcamRef.current)
       // const margin = "calc( ("+width+"px - "+styles.width+") / 2 )"
       return(
@@ -315,9 +270,6 @@ const ARProvider = forwardRef(
         }
       )
     }
-
-
-    console.log('width: ' + width + ', height: ' + height + ', ratio: ' + ratio)
 
     if (width === undefined) return (<></>)
     else return (
