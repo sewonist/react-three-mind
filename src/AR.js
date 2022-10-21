@@ -1,9 +1,9 @@
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import {Canvas, useFrame, useThree} from "@react-three/fiber";
 import {
   faces as FaceMeshFaces,
   uvs as FaceMeshUVs,
 } from "mind-ar/src/face-target/face-geometry/face-data";
-import { Matrix4, Quaternion, Vector3 } from "three";
+import {Matrix4, Quaternion, Vector3} from "three";
 import React, {
   Suspense,
   forwardRef,
@@ -14,14 +14,14 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { atom, useAtom } from "jotai";
+import {atom, useAtom} from "jotai";
 
-import { Controller as FaceTargetController } from "mind-ar/src/face-target/controller";
-import { Html } from "@react-three/drei";
-import { Controller as ImageTargetController } from "mind-ar/src/image-target/controller";
+import {Controller as FaceTargetController} from "mind-ar/src/face-target/controller";
+import {Center, Html} from "@react-three/drei";
+import {Controller as ImageTargetController} from "mind-ar/src/image-target/controller";
 import Webcam from "react-webcam";
-import { useUpdateAtom } from "jotai/utils";
-import { useWindowSize } from "./hooks";
+import {useUpdateAtom} from "jotai/utils";
+import {useWindowSize} from "./hooks";
 
 const anchorsAtom = atom([]);
 const faceMeshesAtom = atom([]);
@@ -37,6 +37,8 @@ const ARProvider = forwardRef(
       filterBeta = null,
       warmupTolerance = null,
       missTolerance = null,
+      onReady,
+      onError,
     },
     ref
   ) => {
@@ -44,11 +46,35 @@ const ARProvider = forwardRef(
     const webcamRef = useRef(null);
     const [ready, setReady] = useState(false);
     const controllerRef = useRef(null);
-    const { camera } = useThree();
+    const {camera} = useThree();
     const [anchors] = useAtom(anchorsAtom);
     const [faceMeshes] = useAtom(faceMeshesAtom);
 
-    const { width, height } = useWindowSize();
+    const {width, height} = useWindowSize();
+
+    const isAndroid = () => {
+      let currentOS;
+      const mobile = (/iphone|ipad|ipod|android/i.test(navigator.userAgent.toLowerCase()));
+
+      if (mobile) {
+        const userAgent = navigator.userAgent.toLowerCase();
+        if (userAgent.search("android") > -1) {
+          currentOS = "android";
+        } else if ((userAgent.search("iphone") > -1) || (userAgent.search("ipod") > -1) || (userAgent.search("ipad") > -1)) {
+          currentOS = "ios";
+        } else {
+          currentOS = "else";
+        }
+      } else {
+        currentOS = "nomobile";
+      }
+
+      if (currentOS === 'android') {
+        return true
+      } else {
+        return false
+      }
+    }
 
     const isLandscape = useMemo(() => height <= width, [height, width]);
     const ratio = useMemo(
@@ -72,16 +98,25 @@ const ARProvider = forwardRef(
 
     const handleStream = useCallback(() => {
       if (webcamRef.current) {
-        webcamRef.current.video.addEventListener("loadedmetadata", () =>
-          setReady(true)
+        webcamRef.current.video.addEventListener("loadedmetadata", () => {
+            console.log(' --- loadedmetadata:')
+            setReady(true)
+          }
         );
       }
     }, [webcamRef]);
 
     const startTracking = useCallback(async () => {
       if (ready) {
+        onReady && onReady()
         let controller;
         if (imageTargets) {
+
+          console.log(' --- webcamRef.current.video.videoWidth')
+          console.log(webcamRef.current.video.videoWidth)
+          console.log(' --- webcamRef.current.video.videoHeight')
+          console.log(webcamRef.current.video.videoHeight)
+
           controller = new ImageTargetController({
             inputWidth: webcamRef.current.video.videoWidth,
             inputHeight: webcamRef.current.video.videoHeight,
@@ -92,7 +127,7 @@ const ARProvider = forwardRef(
             warmupTolerance,
           });
 
-          const { dimensions: imageTargetDimensions } =
+          const {dimensions: imageTargetDimensions} =
             await controller.addImageTargets(imageTargets);
 
           const postMatrices = imageTargetDimensions.map(
@@ -116,10 +151,10 @@ const ARProvider = forwardRef(
 
           controller.onUpdate = (data) => {
             if (data.type === "updateMatrix") {
-              const { targetIndex, worldMatrix } = data;
+              const {targetIndex, worldMatrix} = data;
 
               anchors.forEach(
-                ({ anchor, target, onAnchorFound, onAnchorLost }) => {
+                ({anchor, target, onAnchorFound, onAnchorLost}) => {
                   if (target === targetIndex) {
                     if (
                       !anchor.visible &&
@@ -152,8 +187,8 @@ const ARProvider = forwardRef(
             filterBeta,
           });
 
-          controller.onUpdate = ({ hasFace, estimateResult }) => {
-            faceMeshes.forEach(({ anchor, onFaceFound, onFaceLost }) => {
+          controller.onUpdate = ({hasFace, estimateResult}) => {
+            faceMeshes.forEach(({anchor, onFaceFound, onFaceLost}) => {
               if (!anchor.visible && hasFace && onFaceFound) onFaceFound();
               else if (anchor.visible && !hasFace && onFaceLost) onFaceLost();
 
@@ -161,7 +196,7 @@ const ARProvider = forwardRef(
             });
 
             anchors.forEach(
-              ({ anchor, target, onAnchorFound, onAnchorLost }) => {
+              ({anchor, target, onAnchorFound, onAnchorLost}) => {
                 if (!anchor.visible && hasFace && onAnchorFound)
                   onAnchorFound();
                 else if (anchor.visible && !hasFace && onAnchorLost)
@@ -174,7 +209,7 @@ const ARProvider = forwardRef(
             );
 
             if (hasFace)
-              faceMeshes.forEach(({ anchor }) => {
+              faceMeshes.forEach(({anchor}) => {
                 anchor.matrix.set(...estimateResult.faceMatrix);
 
                 for (let i = 0; i < FaceMeshUVs.length; i++)
@@ -190,7 +225,7 @@ const ARProvider = forwardRef(
 
           await controller.setup(webcamRef.current.video);
 
-          const { fov, aspect, near, far } = controller.getCameraParams();
+          const {fov, aspect, near, far} = controller.getCameraParams();
           camera.fov = fov;
           camera.aspect = aspect;
           camera.near = near;
@@ -225,8 +260,8 @@ const ARProvider = forwardRef(
 
     useFrame(() => {
       if (controllerRef.current && !controllerRef.current.processingVideo) {
-        faceMeshes.forEach(({ anchor }) => (anchor.visible = false));
-        anchors.forEach(({ anchor }) => (anchor.visible = false));
+        faceMeshes.forEach(({anchor}) => (anchor.visible = false));
+        anchors.forEach(({anchor}) => (anchor.visible = false));
       }
     });
 
@@ -253,54 +288,64 @@ const ARProvider = forwardRef(
       }
     }, [autoplay, ready, startTracking]);
 
-    const deviceModel = ()=>{
-      let currentOS;
-      const mobile = (/iphone|ipad|ipod|android/i.test( navigator.userAgent.toLowerCase() ));
 
-      if (mobile)
-      {
-        const userAgent = navigator.userAgent.toLowerCase();
-        if (userAgent.search("android") > -1) {
-          currentOS = "android";
-        } else if ((userAgent.search("iphone") > -1) || (userAgent.search("ipod") > -1) || (userAgent.search("ipad") > -1)) {
-          currentOS = "ios";
-        } else { currentOS = "else"; }
+
+    const fixStyle = () => {
+      const android = isAndroid()
+
+      console.log(webcamRef.current)
+      // console.log(webcamRef.current.style)
+
+      let offset = 0
+
+      if(webcamRef.current?.video?.clientWidth>0){
+        offset = (width - webcamRef.current.video.clientWidth) / 2;
       }
-      else  {  currentOS = "nomobile"; }
 
-      if (currentOS === 'android') {
-        return {
+      offset = parseInt(offset+'')
+
+      // const styles = getComputedStyle(webcamRef.current)
+      // const margin = "calc( ("+width+"px - "+styles.width+") / 2 )"
+      return(
+        {
           width: "auto",
-          marginLeft: "-100%"
+          maxWidth: "none",
+          height: 'inherit',
+          marginLeft: offset+'px'
         }
-      } else {
-        return {}
-      }
+      )
     }
 
 
-    return (
+    console.log('width: ' + width + ', height: ' + height + ', ratio: ' + ratio)
+
+    if (width === undefined) return (<></>)
+    else return (
       <>
         <Html
           fullscreen
           zIndexRange={[-1, -1]}
           calculatePosition={() => [0, 0]}
-          style={{ top: 0, left: 0 }}
+          style={{top: 0, left: 0}}
         >
-          <Webcam
-            ref={webcamRef}
-            onUserMedia={handleStream}
-            height={height}
-            width={width}
-            videoConstraints={{
-              facingMode: isWebcamFacingUser ? "user" : "environment",
-              aspectRatio: ratio,
-              height: height,
-              width: width
-            }}
-            style={deviceModel()}
-          />
+            <Webcam
+              ref={webcamRef}
+              onUserMedia={handleStream}
+              onUserMediaError={(e) => {
+                onError && onError(e)
+              }}
+              height={height}
+              width={width}
+              videoConstraints={{
+                facingMode: isWebcamFacingUser ? "user" : "environment",
+                // aspectRatio: ratio,
+                // height: height,
+                // width: width
+              }}
+              style={fixStyle()}
+            />
         </Html>
+
         {children}
       </>
     );
@@ -318,6 +363,8 @@ const ARView = forwardRef(
       filterBeta,
       warmupTolerance,
       missTolerance,
+      onReady,
+      onError,
       ...rest
     },
     ref
@@ -333,7 +380,7 @@ const ARView = forwardRef(
 
     return (
       <Canvas
-        style={{ position: "absolute", minWidth: "100vw", minHeight: "100vh" }}
+        style={{position: "absolute", minWidth: "100vw", minHeight: "100vh"}}
         {...rest}
         ref={canvasRef}
       >
@@ -347,6 +394,8 @@ const ARView = forwardRef(
               filterBeta,
               warmupTolerance,
               missTolerance,
+              onReady,
+              onError,
             }}
             ref={ARRef}
           >
@@ -359,12 +408,12 @@ const ARView = forwardRef(
 );
 
 const ARAnchor = ({
-  children,
-  target = 0,
-  onAnchorFound,
-  onAnchorLost,
-  ...rest
-}) => {
+                    children,
+                    target = 0,
+                    onAnchorFound,
+                    onAnchorLost,
+                    ...rest
+                  }) => {
   const ref = useRef();
   const setAnchors = useUpdateAtom(anchorsAtom);
 
@@ -372,7 +421,7 @@ const ARAnchor = ({
     if (ref.current)
       setAnchors((anchors) => [
         ...anchors,
-        { target, anchor: ref.current, onAnchorFound, onAnchorLost },
+        {target, anchor: ref.current, onAnchorFound, onAnchorLost},
       ]);
   }, [ref, setAnchors, target, onAnchorFound, onAnchorLost]);
 
@@ -383,7 +432,7 @@ const ARAnchor = ({
   );
 };
 
-const ARFaceMesh = ({ children, onFaceFound, onFaceLost, ...rest }) => {
+const ARFaceMesh = ({children, onFaceFound, onFaceLost, ...rest}) => {
   const ref = useRef();
   const setFaceMeshes = useUpdateAtom(faceMeshesAtom);
 
@@ -403,7 +452,7 @@ const ARFaceMesh = ({ children, onFaceFound, onFaceLost, ...rest }) => {
     if (ref.current)
       setFaceMeshes((faceMeshes) => [
         ...faceMeshes,
-        { anchor: ref.current, onFaceFound, onFaceLost },
+        {anchor: ref.current, onFaceFound, onFaceLost},
       ]);
   }, [ref, setFaceMeshes, onFaceFound, onFaceLost]);
 
@@ -434,4 +483,4 @@ const ARFaceMesh = ({ children, onFaceFound, onFaceLost, ...rest }) => {
   );
 };
 
-export { ARView, ARAnchor, ARFaceMesh };
+export {ARView, ARAnchor, ARFaceMesh};
