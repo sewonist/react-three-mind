@@ -19,6 +19,7 @@ import {atom, useAtom} from "jotai";
 import {Controller as FaceTargetController} from "mind-ar/src/face-target/controller";
 import {Html} from "@react-three/drei";
 import {Controller as ImageTargetController} from "mind-ar/src/image-target/controller";
+import {Compiler} from "mind-ar/src/image-target/compiler";
 import Webcam from "react-webcam";
 import {useUpdateAtom} from "jotai/utils";
 import {useWindowSize} from "./hooks";
@@ -435,4 +436,4 @@ const ARFaceMesh = ({children, onFaceFound, onFaceLost, ...rest}) => {
   );
 };
 
-export {ARView, ARAnchor, ARFaceMesh};
+export {ARView, ARAnchor, ARFaceMesh, Compiler};
