@@ -6,6 +6,22 @@ React Components adding Augmented Reality capabilities to [@react-three/fiber](h
 npm i react-three-mind
 ```
 
+<table>
+  <tbody>
+    <tr>
+      <td width="30%">
+        <img src="https://hiukim.github.io/mind-ar-js-doc/assets/images/basic-demo-fde07aa7567bf213e61b37dbaa192fec.gif" width="100%">
+      </td>
+      <td width="30%">
+        <img src="https://hiukim.github.io/mind-ar-js-doc/assets/images/face-tryon-demo-369c4ba701f1df2099ecf05c27f0c944.gif" width="100%"/>
+      </td>
+      <td width="30%">
+        <img src="https://hiukim.github.io/mind-ar-js-doc/assets/images/face-mesh-demo-8f5bd8d1bcbffbdb76896b58171ecc8a.gif" width="100%"/>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 ## 📍 Motivation
 
 There's no easy and ready-to-use way of developing AR experiences whilst leveraging on the amazing ecosystem around [@react-three/fiber](https://github.com/pmndrs/react-three-fiber). [MindAR](https://github.com/hiukim/mind-ar-js) is a performance-oriented and easy to use library managing image and face tracking, but only supports [AFrame](https://aframe.io) or vanilla [Three.js](https://threejs.org). This library aims to bridge the two worlds, while waiting for the new [WebXR Standard](https://caniuse.com/webxr) to include image and face tracking.
@@ -15,18 +31,19 @@ There's no easy and ready-to-use way of developing AR experiences whilst leverag
 Provide an [imageTargets]("https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/examples/image-tracking/assets/card-example/card.mind") url to toggle image tracking mode. See the [examples](./examples) and the original [MindAR Documentation](https://hiukim.github.io/mind-ar-js-doc/quick-start/compile) to find out how to compile your own image targets.
 
 ```jsx
-import ReactDOM from "react-dom";
 import React from "react";
+import { createRoot } from "react-dom/client";
 
 import { ARView, ARFaceMesh } from "react-three-mind";
 
-ReactDOM.render(
+const container = document.getElementById("root");
+const root = createRoot(container);
+root.render(
   <ARView>
     <ARFaceMesh>
       <meshBasicMaterial color="hotpink" wireframe />
     </ARFaceMesh>
-  </ARView>,
-  document.getElementById("root")
+  </ARView>
 );
 ```
 
@@ -86,7 +103,12 @@ A Mesh Object representing a tracked face (see the original [MindAR example](htt
 </ARFaceMesh>
 ```
 
+## 🙏 Credits
+
+[MindAR](https://github.com/hiukim/mind-ar-js) is developed by the amazing [HiuKim Yuen](https://github.com/hiukim/). The showcase videos in this README come from its documentation.
+
 ## 📮 TODO
 
-- [ ] Add Showcase Video
-- [ ] Fix CI Build
+- [x] Add Showcase Video
+- [x] Fix Performance Issues
+- [ ] Fix CI Build (Update to mind-ar 1.2)
