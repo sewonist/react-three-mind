@@ -97,6 +97,7 @@ const ARProvider = forwardRef(
             filterBeta,
             missTolerance,
             warmupTolerance,
+            isWebcamFacingUser,
           });
 
           const { dimensions: imageTargetDimensions } =
@@ -139,6 +140,7 @@ const ARProvider = forwardRef(
           controller = new FaceTargetController({
             filterMinCF,
             filterBeta,
+            isWebcamFacingUser,
           });
 
           controller.onUpdate = ({
@@ -218,11 +220,23 @@ const ARProvider = forwardRef(
       }
       offset = parseInt(offset + "");
 
+      let flip = {
+        "WebkitTransform": "scaleX(1)",
+        "transform": "scaleX(1)",
+      }
+      if(isWebcamFacingUser){
+        flip = {
+          "WebkitTransform": "scaleX(-1)",
+          "transform": "scaleX(-1)",
+        }
+      }
+
       return {
         width: "auto",
         maxWidth: "none",
         height: "inherit",
         marginLeft: offset + "px",
+        ...flip
       };
     };
 
