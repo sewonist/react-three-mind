@@ -1,9 +1,10 @@
 {
   "name": "react-three-mind",
-  "version": "0.1.12",
+  "version": "0.1.10",
   "description": "Custom react-three-mind",
   "main": "dist/index.js",
   "author": "Tommaso Turchi",
+  "contributors": ["Sewon Ahn"],
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -40,6 +41,6 @@
     "jotai": "^1.8.6",
     "mind-ar": "C:\\Projects\\01.Onday\\05.Projects\\mind-ar-js",
     "react-webcam": "^7.0.1",
-    "three": "^0.145.0"
+    "three": "^0.147.0"
   }
 }

@@ -143,19 +143,13 @@ const ARProvider = forwardRef(
             isWebcamFacingUser,
           });
 
-
-          // faceMatrix 가 undefined 일 수 있음
           controller.onUpdate = ({
             hasFace,
             estimateResult: { faceMatrix, metricLandmarks, faceScale },
           }) => {
-            try{
-              setFaceMesh(
-                hasFace ? { faceMatrix, metricLandmarks, faceScale } : null
-              );
-            } catch (e) {
-              console.log(e);
-            }
+            setFaceMesh(
+              hasFace ? { faceMatrix, metricLandmarks, faceScale } : null
+            );
           };
 
           await controller.setup(webcamRef.current.video);
