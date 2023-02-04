@@ -55,20 +55,6 @@ const ARProvider = forwardRef(
     const { width, height } = useWindowSize();
 
     useEffect(() => {
-      if (controllerRef.current) {
-        setMode(Boolean(imageTargets));
-
-        if (imageTargets) {
-          const ARprojectionMatrix =
-            controllerRef.current.getProjectionMatrix();
-          camera.fov =
-            (2 * Math.atan(1 / ARprojectionMatrix[5]) * 180) / Math.PI;
-          camera.near = ARprojectionMatrix[14] / (ARprojectionMatrix[10] - 1.0);
-          camera.far = ARprojectionMatrix[14] / (ARprojectionMatrix[10] + 1.0);
-          camera.updateProjectionMatrix();
-        }
-      }
-
       return () => {
         if (controllerRef.current) {
           controllerRef.current.stopProcessVideo();
@@ -89,6 +75,8 @@ const ARProvider = forwardRef(
       if (ready) {
         let controller;
         if (imageTargets) {
+          setMode(true);
+
           controller = new ImageTargetController({
             inputWidth: webcamRef.current.video.videoWidth,
             inputHeight: webcamRef.current.video.videoHeight,
@@ -137,6 +125,8 @@ const ARProvider = forwardRef(
             }
           };
         } else {
+          setMode(false);
+
           controller = new FaceTargetController({
             filterMinCF,
             filterBeta,
