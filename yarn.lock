@@ -2147,8 +2147,10 @@ mime-types@^2.1.12, mime-types@^2.1.27:
   dependencies:
     mime-db "1.52.0"
 
-"mind-ar@file:../mind-ar-js":
+"mind-ar@https://github.com/sewonist/mind-ar-js/releases/download/v1.1.6/v1.1.6.tgz":
   version "1.1.6"
+  resolved "https://github.com/sewonist/mind-ar-js/releases/download/v1.1.6/v1.1.6.tgz"
+  integrity sha512-bkHr0fcJbYwK7M6kVKH4joOX0Hk9tmvOoQD3vgskS4jz4GVDGS69Ns5uj5f26UhtgckkH++PfyExjblPhJSYhA==
   dependencies:
     "@mediapipe/face_mesh" "^0.4.1633559619"
     "@msgpack/msgpack" "^1.12.2"

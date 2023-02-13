@@ -39,7 +39,7 @@
     "@react-three/drei": "^9.36.0",
     "@react-three/fiber": "^8.8.10",
     "jotai": "^1.8.6",
-    "mind-ar": "C:\\Projects\\01.Onday\\05.Projects\\mind-ar-js",
+    "mind-ar": "https://github.com/sewonist/mind-ar-js/releases/download/v1.1.6/v1.1.6.tgz",
     "react-webcam": "^7.0.1",
     "three": "^0.147.0"
   }

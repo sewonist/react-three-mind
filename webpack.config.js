@@ -8,6 +8,7 @@ module.exports = {
     path: path.resolve("dist"),
     filename: "index.js",
     libraryTarget: "commonjs2",
+    publicPath: ''
   },
   module: {
     rules: [
